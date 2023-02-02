@@ -44,3 +44,19 @@ exports.postEditPost = (req, res, next) => {
         });
     });
 }
+
+exports.postDeletePost = (req, res, next) => {
+    const postId = req.body.postId;
+
+    Post.delete(postId).then((result) => {
+        console.log(result);
+        res.status(201).json({
+            message: 'Successfully deleted post'
+        });
+    }).catch((err) => {
+        console.log(err);
+        res.status(400).json({
+            message: 'Error'
+        });
+    })
+}

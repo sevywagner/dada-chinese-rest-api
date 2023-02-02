@@ -17,14 +17,19 @@ class Post {
         return db.collection('posts').insertOne(this);
     }
 
+    update() {
+        const db = getDb();
+        return db.collection('posts').updateOne({ _id: this._id }, { $set: this });
+    }
+
     static fetchAll() {
         const db = getDb();
         return db.collection('posts').find().toArray();
     }
 
-    update() {
+    static delete(postId) {
         const db = getDb();
-        return db.collection('posts').updateOne({ _id: this._id }, { $set: this });
+        return db.collection('posts').deleteOne({ _id: new ObjectId(postId) });
     }
 }
 
