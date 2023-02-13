@@ -26,6 +26,11 @@ class User {
         const db = getDb();
         return db.collection('users').findOne({ _id: new ObjectId(userId) });
     }
+
+    static findByEmail(email) {
+        const db = getDb();
+        return db.collection('users').findOne({ email: email });
+    }
 }
 
 module.exports = User;
