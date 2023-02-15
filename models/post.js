@@ -31,6 +31,11 @@ class Post {
         const db = getDb();
         return db.collection('posts').deleteOne({ _id: new ObjectId(postId) });
     }
+
+    static findById(postId) {
+        const db = getDb();
+        return db.collection('posts').findOne({ _id: new ObjectId(postId) });
+    }
 }
 
 module.exports = Post;

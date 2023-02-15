@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { validationResult } = require('express-validator');
 const Post = require('./../models/post');
 
@@ -7,25 +9,17 @@ exports.getPosts = (req, res, next) => {
             posts: posts
         });
     }).catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
+        catchHandler(err);
     });
 }
 
 exports.postCreatePost = (req, res, next) => {
     const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        const error = new Error('Invalid input');
-        error.statusCode = 422;
-        throw error;
-    }
+    validationErrorHandler(errors, 'Invalid input');
 
     const title = req.body.title;
     const content = req.body.content;
-    const imageUrl = req.body.imageUrl;
+    const imageUrl = req.file.path;
     const date = req.body.date;
     
     const post = new Post(title, content, imageUrl, date);
@@ -35,28 +29,34 @@ exports.postCreatePost = (req, res, next) => {
             message: 'Success'
         });
     }).catch(err => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
+        catchHandler(err);
     });
 }
 
 exports.putEditPost = (req, res, next) => {
     const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        const error = new Error('Invalid input');
-        error.statusCode = 422;
-        throw error;
-    }
+    validationErrorHandler(errors, 'Invalid input');
 
     const postId = req.body.id;
+    let loadedPost;
+
+    Post.findById(postId).then((post) => {
+        notFoundErrorHandler(post, 'Post not found');
+
+        loadedPost = post;
+    }).catch((err) => {
+        catchHandler(err);
+    });
+    
     const title = req.body.title;
     const content = req.body.content;
-    const imageUrl = req.body.imageUrl;
     const date = req.body.date;
-    
+    let imageUrl = req.body.imageUrl;
+    if (req.file) {
+        imageUrl = req.file.path;
+        deleteFile(loadedPost);
+    }
+
     const updatedPost = new Post(title, content, imageUrl, date, postId);
 
     updatedPost.update().then((result) => {
@@ -66,25 +66,57 @@ exports.putEditPost = (req, res, next) => {
             post: result
         });
     }).catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
+        catchHandler(err);
     });
 }
 
 exports.deletePost = (req, res, next) => {
     const postId = req.body.postId;
+    let loadedPost;
 
-    Post.delete(postId).then((result) => {
+    Post.findById(postId).then((post) => {
+        notFoundErrorHandler(post, 'Post not found');
+
+        loadedPost = post;
+        return Post.delete(post._id);
+    }).then((result) => {
         console.log(result);
+        deleteFile(loadedPost);
         res.status(201).json({
             message: 'Successfully deleted post'
         });
     }).catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
+        catchHandler(err);
+    });
+}
+
+const catchHandler = (err) => {
+    if (!err.statusCode) {
+        err.statusCode = 500;
+    }
+    next(err);
+}
+
+const deleteFile = (loadedPost) => {
+    fs.unlink(path.join(__dirname, '..', loadedPost.imageUrl), (err) => {
+        if (err) {
+            throw err;
         }
-        next(err);
-    })
+    });
+}
+
+const validationErrorHandler = (errors, message) => {
+    if (!errors.isEmpty()) {
+        const error = new Error(message);
+        error.statusCode = 422;
+        throw error;
+    }
+}
+
+const notFoundErrorHandler = (item, message) => {
+    if (!item) {
+        const error = new Error(message);
+        error.statusCode = 404;
+        throw error;
+    }
 }
