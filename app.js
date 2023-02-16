@@ -55,8 +55,9 @@ app.use('/auth', authRoutes);
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((error, req, res, next) => {
+    console.log(error);
     res.status(error.statusCode).json({
-        error: error,
+        error: error.message,
         statusCode: error.statusCode
     });
 })

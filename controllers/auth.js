@@ -7,6 +7,7 @@ exports.putSignup = (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
+        console.log(errors.array()[0].msg);
         const error = new Error(errors.array()[0].msg);
         error.statusCode = 422;
         throw error;
@@ -35,7 +36,7 @@ exports.postLogin = (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        const error = new Error('Invalid input');
+        const error = new Error(errors.array()[0].msg);
         error.statusCode = 422;
         throw error;
     }
