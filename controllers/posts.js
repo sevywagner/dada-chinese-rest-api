@@ -43,6 +43,12 @@ exports.putEditPost = (req, res, next) => {
     const errors = validationResult(req);
     validationErrorHandler(errors, 'Invalid input');
 
+    if (!req.isAdmin) {
+        return res.status(401).json({
+            message: 'You are not authenticated'
+        });
+    }
+
     const postId = req.body.id;
     let loadedPost;
 
@@ -79,6 +85,12 @@ exports.putEditPost = (req, res, next) => {
 exports.deletePost = (req, res, next) => {
     const postId = req.body.postId;
     let loadedPost;
+
+    if (!req.isAdmin) {
+        return res.status(401).json({
+            message: 'You are not authenticated'
+        });
+    }
 
     Post.findById(postId).then((post) => {
         notFoundErrorHandler(post, 'Post not found');
