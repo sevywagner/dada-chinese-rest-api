@@ -17,6 +17,12 @@ exports.postCreatePost = (req, res, next) => {
     const errors = validationResult(req);
     validationErrorHandler(errors, 'Invalid input');
 
+    if (!req.isAdmin) {
+        return res.status(401).json({
+            message: 'You are not authenticated'
+        });
+    }
+
     const title = req.body.title;
     const content = req.body.content;
     const imageUrl = req.file.path;
