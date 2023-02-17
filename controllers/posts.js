@@ -29,6 +29,7 @@ exports.postCreatePost = (req, res, next) => {
     const date = req.body.date;
     
     const post = new Post(title, content, imageUrl, date);
+
     post.save().then(() => {
         console.log('Added');
         res.status(201).json({
@@ -50,15 +51,6 @@ exports.putEditPost = (req, res, next) => {
     }
 
     const postId = req.body.id;
-    let loadedPost;
-
-    Post.findById(postId).then((post) => {
-        notFoundErrorHandler(post, 'Post not found');
-
-        loadedPost = post;
-    }).catch((err) => {
-        catchHandler(err);
-    });
     
     const title = req.body.title;
     const content = req.body.content;
@@ -66,7 +58,7 @@ exports.putEditPost = (req, res, next) => {
     let imageUrl = req.body.imageUrl;
     if (req.file) {
         imageUrl = req.file.path;
-        deleteFile(loadedPost);
+        deleteFile(req.body.imageUrl);
     }
 
     const updatedPost = new Post(title, content, imageUrl, date, postId);
@@ -115,8 +107,8 @@ const catchHandler = (err) => {
     next(err);
 }
 
-const deleteFile = (loadedPost) => {
-    fs.unlink(path.join(__dirname, '..', loadedPost.imageUrl), (err) => {
+const deleteFile = (url) => {
+    fs.unlink(path.join(__dirname, '..', url), (err) => {
         if (err) {
             throw err;
         }
