@@ -27,6 +27,6 @@ module.exports = (req, res, next) => {
     }
 
     req.userId = decodedToken.userId;
-    req.isAdmin = decodedToken.userId === process.env.ADMIN_ID ? true : false;
+    req.isAdmin = decodedToken.userId === process.env.ADMIN_ID1 || decodedToken.userId === process.env.ADMIN_ID2 ? true : false;
     next();
 }
