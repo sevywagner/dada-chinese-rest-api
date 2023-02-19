@@ -91,7 +91,7 @@ exports.deletePost = (req, res, next) => {
         return Post.delete(post._id);
     }).then((result) => {
         console.log(result);
-        deleteFile(loadedPost);
+        deleteFile(loadedPost.imageUrl);
         res.status(201).json({
             message: 'Successfully deleted post'
         });
@@ -110,7 +110,7 @@ const catchHandler = (err) => {
 const deleteFile = (url) => {
     fs.unlink(path.join(__dirname, '..', url), (err) => {
         if (err) {
-            throw err;
+            console.log(err);
         }
     });
 }
