@@ -22,7 +22,7 @@ router.put('/signup', [
     })
 ], authController.putSignup);
 
-router.post('/login', authController.postLogin);
+router.post('/login', body('email').normalizeEmail(), authController.postLogin);
 
 router.post('/reset-password', body('email').custom((value, { req }) => {
     return User.findByEmail(value).then((user) => {
