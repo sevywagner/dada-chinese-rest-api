@@ -101,7 +101,7 @@ exports.postForgotPassword = (req, res, next) => {
                 to: email,
                 from: 'sevywagner@gmail.com',
                 secure: true,
-                html: `<p>Click <a href="http://localhost:3000/dada-chinese/reset-password/${token}">here</a> to reset password</p>`
+                html: `<p>Click <a href="https://sevywagner.github.io/dada-chinese/reset-password/${token}">here</a> to reset password</p>`
             });
             res.status(200).json({
                 message: 'Successfully sent the reset link to your email. It expires in 1 hour.'
