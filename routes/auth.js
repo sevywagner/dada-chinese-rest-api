@@ -15,7 +15,6 @@ router.put('/signup', [
     }).normalizeEmail(),
     body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
     body('confirmPassword').custom((value, { req }) => {
-        console.log(req.body.password);
         if (value !== req.body.password) {
             throw new Error('Passwords must match');
         }
@@ -25,6 +24,22 @@ router.put('/signup', [
 
 router.post('/login', authController.postLogin);
 
-router.get('/admin-status', authController.getAdminStatus);
+router.post('/reset-password', body('email').custom((value, { req }) => {
+    return User.findByEmail(value).then((user) => {
+        if (!user) {
+            return Promise.reject('An account with this email was not found');
+        }
+    });
+}), authController.postForgotPassword);
+
+router.post('/change-password', [
+    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+    body('confirmPassword').custom((value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error('Passwords must match');
+        }
+        return true;
+    })
+], authController.postChangePassword);
 
 module.exports = router;

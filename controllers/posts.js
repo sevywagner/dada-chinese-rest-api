@@ -5,6 +5,7 @@ const Post = require('./../models/post');
 
 exports.getPosts = (req, res, next) => {
     Post.fetchAll().then((posts) => {
+        notFoundErrorHandler(posts, 'Unable to get list of posts');
         res.status(200).json({
             posts: posts
         });

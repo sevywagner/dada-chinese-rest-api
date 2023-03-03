@@ -60,7 +60,7 @@ app.use((error, req, res, next) => {
         error: error.message,
         statusCode: error.statusCode
     });
-})
+});
 
 mongoConnect(() => {
     app.listen(process.env.PORT || 8080);
