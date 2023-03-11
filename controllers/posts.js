@@ -10,7 +10,7 @@ exports.getPosts = (req, res, next) => {
             posts: posts
         });
     }).catch((err) => {
-        catchHandler(err);
+        catchHandler(err, next);
     });
 }
 
@@ -27,9 +27,10 @@ exports.postCreatePost = (req, res, next) => {
     const title = req.body.title;
     const content = req.body.content;
     const imageUrl = req.file.path;
+    const videoUrl = req.body.videoUrl;
     const date = req.body.date;
     
-    const post = new Post(title, content, imageUrl, date);
+    const post = new Post(title, content, imageUrl, videoUrl, date);
 
     post.save().then(() => {
         console.log('Added');
@@ -37,7 +38,7 @@ exports.postCreatePost = (req, res, next) => {
             message: 'Success'
         });
     }).catch(err => {
-        catchHandler(err);
+        catchHandler(err, next);
     });
 }
 
@@ -61,8 +62,9 @@ exports.putEditPost = (req, res, next) => {
         imageUrl = req.file.path;
         deleteFile(req.body.imageUrl);
     }
+    const videoUrl = req.body.videoUrl;
 
-    const updatedPost = new Post(title, content, imageUrl, date, postId);
+    const updatedPost = new Post(title, content, imageUrl, videoUrl, date, postId);
 
     updatedPost.update().then((result) => {
         console.log('Updated');
@@ -71,7 +73,7 @@ exports.putEditPost = (req, res, next) => {
             post: result
         });
     }).catch((err) => {
-        catchHandler(err);
+        catchHandler(err, next);
     });
 }
 
@@ -101,7 +103,7 @@ exports.deletePost = (req, res, next) => {
     });
 }
 
-const catchHandler = (err) => {
+const catchHandler = (err, next) => {
     if (!err.statusCode) {
         err.statusCode = 500;
     }

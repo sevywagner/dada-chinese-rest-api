@@ -5,4 +5,7 @@ const isAuth = require('./../middleware/is-auth');
 router.post('/update-cart', isAuth, shopController.postUpdateCart);
 router.get('/get-cart', isAuth, shopController.getCart);
 
+router.post('/order-email', isAuth, shopController.postConfirmOrder);
+router.put('/new-order', isAuth, shopController.putNewOrder);
+
 module.exports = router;
