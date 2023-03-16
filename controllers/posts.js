@@ -16,7 +16,7 @@ exports.getPosts = (req, res, next) => {
 
 exports.postCreatePost = (req, res, next) => {
     const errors = validationResult(req);
-    validationErrorHandler(errors, 'Invalid input');
+    validationErrorHandler(errors);
 
     if (!req.isAdmin) {
         return res.status(401).json({
@@ -44,7 +44,7 @@ exports.postCreatePost = (req, res, next) => {
 
 exports.putEditPost = (req, res, next) => {
     const errors = validationResult(req);
-    validationErrorHandler(errors, 'Invalid input');
+    validationErrorHandler(errors);
 
     if (!req.isAdmin) {
         return res.status(401).json({
@@ -118,9 +118,9 @@ const deleteFile = (url) => {
     });
 }
 
-const validationErrorHandler = (errors, message) => {
+const validationErrorHandler = (errors) => {
     if (!errors.isEmpty()) {
-        const error = new Error(message);
+        const error = new Error(errors.array()[0].msg);
         error.statusCode = 422;
         throw error;
     }

@@ -1,9 +1,10 @@
 const getDb = require('./../util/database').getDb;
 
 class Order {
-    constructor(items, totalPrice, userEmail, userId) {
+    constructor(items, totalPrice, address, userEmail, userId) {
         this.items = items;
         this.totalPrice = totalPrice;
+        this.address = address;
         this.userEmail = userEmail;
         this.userId = userId;
     }

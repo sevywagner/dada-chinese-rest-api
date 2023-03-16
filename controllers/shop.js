@@ -1,4 +1,5 @@
 const { createTransport } = require('nodemailer');
+const { validationResult } = require('express-validator');
 const User = require('./../models/user');
 const Order = require('./../models/order');
 
@@ -88,6 +89,14 @@ exports.postConfirmOrder = (req, res, next) => {
 exports.putNewOrder = (req, res, next) => {
     const items = req.body.items;
     const totalPrice = req.body.totalPrice;
+    const address = req.body.address;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error(errors.array()[0].msg);
+        error.statusCode = 422;
+        throw error;
+    }
 
     User.findById(req.userId).then((user) => {
         if (!user) {
@@ -96,7 +105,7 @@ exports.putNewOrder = (req, res, next) => {
             throw error;
         }
         
-        const order = new Order(items, totalPrice, user.email, user._id);
+        const order = new Order(items, totalPrice, address, user.email, user._id);
         order.save().then(() => {
             res.status(201).json({
                 message: 'Created order'
