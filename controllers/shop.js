@@ -105,7 +105,7 @@ exports.putNewOrder = (req, res, next) => {
             throw error;
         }
         
-        const order = new Order(items, totalPrice, address, user.email, user._id);
+        const order = new Order(items, totalPrice, address, user.email, user.name, user._id);
         order.save().then(() => {
             res.status(201).json({
                 message: 'Created order'
@@ -115,6 +115,32 @@ exports.putNewOrder = (req, res, next) => {
                 err.statusCode = 500;
             }
             next(err);
+        });
+    }).catch((err) => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+}
+
+exports.getOrders = (req, res, next) => {
+    Order.fetchOrders().then((orders) => {
+        if (!orders) {
+            const error = new Error('Error fetching orders');
+            error.statusCode = 500;
+            throw error;
+        }
+
+        if (!req.isAdmin) {
+            const error = new Error('You are not authenticated');
+            error.statusCode = 401;
+            throw error;
+        }
+
+        res.status(200).json({
+            message: 'Successfully fetched orders',
+            orders: orders
         });
     }).catch((err) => {
         if (!err.statusCode) {

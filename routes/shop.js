@@ -11,4 +11,6 @@ router.put('/new-order', [
     body('address').isLength({ min: 5 }).withMessage('Please enter a valid address')
 ], isAuth, shopController.putNewOrder);
 
+router.get('/orders', isAuth, shopController.getOrders);
+
 module.exports = router;
