@@ -105,7 +105,7 @@ exports.putNewOrder = (req, res, next) => {
             throw error;
         }
         
-        const order = new Order(items, totalPrice, address, user.email, user.name, user._id);
+        const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), user._id);
         order.save().then(() => {
             res.status(201).json({
                 message: 'Created order'
