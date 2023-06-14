@@ -24,7 +24,7 @@ exports.getRedirect = async (req, res, next) => {
     const { tokens } = await oauth2Client.getToken(code);
     console.log(tokens.expiry_date);
     oauth2Client.setCredentials(tokens);
-    res.send('<a href="http://localhost:3000/dada-chinese/new-blog">Back to creating a blog</a><br><a href="http://localhost:3000/dada-chinese/admin-blog">Back to editing a blog</a>');
+    res.send('<a href="https://sevywagner.github.io/dada-chinese/new-blog">Back to creating a blog</a><br><a href="http://localhost:3000/dada-chinese/admin-blog">Back to editing a blog</a>');
 }
 
 exports.getPosts = (req, res, next) => {
