@@ -2,6 +2,30 @@ const fs = require('fs');
 const path = require('path');
 const { validationResult } = require('express-validator');
 const Post = require('./../models/post');
+const { google } = require('googleapis');
+
+const oauth2Client = new google.auth.OAuth2({
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    redirectUri: process.env.REDIRECT_URI
+});
+
+exports.getAuthUrl = async (req, res, next) => {
+    const url = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/drive']
+    });
+
+    res.redirect(url);
+}
+
+exports.getRedirect = async (req, res, next) => {
+    const { code } = req.query;
+    const { tokens } = await oauth2Client.getToken(code);
+    console.log(tokens.expiry_date);
+    oauth2Client.setCredentials(tokens);
+    res.send('<a href="http://localhost:3000/dada-chinese/new-blog">Back to creating a blog</a><br><a href="http://localhost:3000/dada-chinese/admin-blog">Back to editing a blog</a>');
+}
 
 exports.getPosts = (req, res, next) => {
     Post.fetchAll().then((posts) => {
@@ -14,7 +38,7 @@ exports.getPosts = (req, res, next) => {
     });
 }
 
-exports.postCreatePost = (req, res, next) => {
+exports.postCreatePost = async (req, res, next) => {
     const errors = validationResult(req);
     validationErrorHandler(errors);
 
@@ -24,16 +48,54 @@ exports.postCreatePost = (req, res, next) => {
         });
     }
 
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
     const title = req.body.title;
     const content = req.body.content;
-    const imageUrl = req.file.path;
+    const image = req.file;
     const videoUrl = req.body.videoUrl;
     const date = req.body.date;
+    let driveId;
+    let webContentLink;
+
+    try {
+        const response = await drive.files.create({
+            requestBody: {
+                mimeType: image.mimeType,
+                name: image.originalname
+            },
+            media: {
+                mimeType: image.mimeType,
+                body: fs.createReadStream(image.path)
+            }
+        });
+
+        driveId = response.data.id;
+    } catch(err) {
+        console.log(err);
+    }
+
+    try {
+        const response = await drive.files.get({
+            fileId: driveId,
+            mimeType: image.mimetype,
+            fields: 'webContentLink'
+        });
+
+        webContentLink = response.data.webContentLink;
+    } catch(err) {
+        console.log(err);
+    }
     
-    const post = new Post(title, content, imageUrl, videoUrl, date);
+    const post = new Post(title, content, webContentLink, videoUrl, date);
 
     post.save().then(() => {
         console.log('Added');
+        fs.unlink(image.path, (err) => {
+            if (err) {
+                console.log(err);
+            }
+        });
         res.status(201).json({
             message: 'Success'
         });
@@ -42,7 +104,7 @@ exports.postCreatePost = (req, res, next) => {
     });
 }
 
-exports.putEditPost = (req, res, next) => {
+exports.putEditPost = async (req, res, next) => {
     const errors = validationResult(req);
     validationErrorHandler(errors);
 
@@ -52,19 +114,55 @@ exports.putEditPost = (req, res, next) => {
         });
     }
 
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
     const postId = req.body.id;
-    
     const title = req.body.title;
     const content = req.body.content;
     const date = req.body.date;
-    let imageUrl = req.body.imageUrl;
+    let imageWebContentLink = req.body.imageWebContentLink;
     if (req.file) {
-        imageUrl = req.file.path;
-        deleteFile(req.body.imageUrl);
+        let driveId;
+        const image = req.file;
+
+        try {
+            const response = await drive.files.create({
+                requestBody: {
+                    mimeType: image.mimeType,
+                    name: image.originalname
+                },
+                media: {
+                    mimeType: image.mimeType,
+                    body: fs.createReadStream(image.path)
+                }
+            });
+
+            driveId = response.data.id;
+        } catch(err) {
+            console.log(err);
+        }
+
+        try {
+            const response = await drive.files.get({
+                fileId: driveId,
+                mimeType: image.mimetype,
+                fields: 'webContentLink'
+            });
+
+            imageWebContentLink = response.data.webContentLink;
+
+            fs.unlink(image.path, (err) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
+        } catch(err) {
+            console.log(err);
+        }
     }
     const videoUrl = req.body.videoUrl;
 
-    const updatedPost = new Post(title, content, imageUrl, videoUrl, date, postId);
+    const updatedPost = new Post(title, content, imageWebContentLink, videoUrl, date, postId);
 
     updatedPost.update().then((result) => {
         console.log('Updated');
@@ -94,12 +192,11 @@ exports.deletePost = (req, res, next) => {
         return Post.delete(post._id);
     }).then((result) => {
         console.log(result);
-        deleteFile(loadedPost.imageUrl);
         res.status(201).json({
             message: 'Successfully deleted post'
         });
     }).catch((err) => {
-        catchHandler(err);
+        catchHandler(err, next);
     });
 }
 
@@ -108,14 +205,6 @@ const catchHandler = (err, next) => {
         err.statusCode = 500;
     }
     next(err);
-}
-
-const deleteFile = (url) => {
-    fs.unlink(path.join(__dirname, '..', url), (err) => {
-        if (err) {
-            console.log(err);
-        }
-    });
 }
 
 const validationErrorHandler = (errors) => {
