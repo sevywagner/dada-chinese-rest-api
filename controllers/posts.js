@@ -86,17 +86,17 @@ exports.postCreatePost = async (req, res, next) => {
         console.log(err);
     }
 
-    // try {
-    //     const response = await drive.permissions.create({
-    //         fileId: driveId,
-    //         requestBody: {
-    //             role: 'reader',
-    //             type: 'anyone'
-    //         }
-    //     });
-    // } catch(err) {
-    //     console.log(err);
-    // }
+    try {
+        const response = await drive.permissions.create({
+            fileId: driveId,
+            requestBody: {
+                role: 'reader',
+                type: 'anyone'
+            }
+        });
+    } catch(err) {
+        console.log(err);
+    }
     
     const post = new Post(title, content, webContentLink, videoUrl, date);
 
@@ -171,17 +171,17 @@ exports.putEditPost = async (req, res, next) => {
             console.log(err);
         }
 
-        // try {
-        //     const response = await drive.permissions.create({
-        //         fileId: driveId,
-        //         requestBody: {
-        //             role: 'reader',
-        //             type: 'anyone'
-        //         }
-        //     });
-        // } catch(err) {
-        //     console.log(err);
-        // }
+        try {
+            const response = await drive.permissions.create({
+                fileId: driveId,
+                requestBody: {
+                    role: 'reader',
+                    type: 'anyone'
+                }
+            });
+        } catch(err) {
+            console.log(err);
+        }
     }
     const videoUrl = req.body.videoUrl;
 
