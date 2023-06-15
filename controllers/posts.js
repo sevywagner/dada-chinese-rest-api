@@ -48,15 +48,14 @@ exports.postCreatePost = async (req, res, next) => {
         });
     }
 
-    const drive = google.drive({ version: 'v3', auth: oauth2Client });
-
     const title = req.body.title;
     const content = req.body.content;
     const image = req.file;
     const videoUrl = req.body.videoUrl;
     const date = req.body.date;
-    let driveId;
-    let webContentLink;
+
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+    let driveId, webContentLink;
 
     try {
         const response = await drive.files.create({
@@ -83,6 +82,18 @@ exports.postCreatePost = async (req, res, next) => {
         });
 
         webContentLink = response.data.webContentLink;
+    } catch(err) {
+        console.log(err);
+    }
+
+    try {
+        const response = await drive.permissions.create({
+            fileId: driveId,
+            requestBody: {
+                role: 'reader',
+                type: 'anyone'
+            }
+        });
     } catch(err) {
         console.log(err);
     }
@@ -154,6 +165,18 @@ exports.putEditPost = async (req, res, next) => {
             fs.unlink(image.path, (err) => {
                 if (err) {
                     console.log(err);
+                }
+            });
+        } catch(err) {
+            console.log(err);
+        }
+
+        try {
+            const response = await drive.permissions.create({
+                fileId: driveId,
+                requestBody: {
+                    role: 'reader',
+                    type: 'anyone'
                 }
             });
         } catch(err) {
