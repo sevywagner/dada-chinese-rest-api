@@ -8,7 +8,6 @@ const compression = require('compression');
 const morgan = require('morgan');
 const multer = require('multer');
 const cors = require('cors');
-const { google } = require('googleapis');
 
 const mongoConnect = require('./util/database').mongoConnect;
 const postRoutes = require('./routes/posts');

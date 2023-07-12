@@ -7,9 +7,9 @@ router.post('/update-cart', isAuth, shopController.postUpdateCart);
 router.get('/get-cart', isAuth, shopController.getCart);
 
 router.post('/order-email', isAuth, shopController.postConfirmOrder);
-router.put('/new-order', [
-    body('address').isLength({ min: 5 }).withMessage('Please enter a valid address')
-], isAuth, shopController.putNewOrder);
+router.post('/order-email-guest', shopController.postConfirmOrder);
+router.put('/new-order', isAuth, shopController.putNewOrder);
+router.put('/new-order-guest', shopController.putNewOrder);
 
 router.get('/orders', isAuth, shopController.getOrders);
 

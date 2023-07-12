@@ -24,7 +24,7 @@ exports.putSignup = (req, res, next) => {
     const password = req.body.password;
 
     bcrypt.hash(password, 12).then((hashedPassword) => {
-        const user = new User(name, email, hashedPassword, { items: [], totalPrice: 0.00 });
+        const user = new User(name, email, hashedPassword, { items: [], totalPrice: 0.00, totalQuantity: 0 });
         return user.save();
     }).then((result) => {
         res.status(201).json({

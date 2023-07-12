@@ -22,7 +22,6 @@ exports.getAuthUrl = async (req, res, next) => {
 exports.getRedirect = async (req, res, next) => {
     const { code } = req.query;
     const { tokens } = await oauth2Client.getToken(code);
-    console.log(tokens.expiry_date);
     oauth2Client.setCredentials(tokens);
     res.send('<a href="https://sevywagner.github.io/dada-chinese/new-blog">Back to creating a blog</a><br><a href="https://sevywagner.github.io/dada-chinese/admin-blog">Back to editing a blog</a>');
 }

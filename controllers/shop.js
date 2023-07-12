@@ -62,27 +62,32 @@ exports.postConfirmOrder = (req, res, next) => {
     const stringItems = cartItems.forEach((item) => {
         string += `${item.title} ${item.price}`
     });
-
     console.log(stringItems);
 
-    User.findById(req.userId).then((user) => {
-        if (!user) {
-            const error = new Error('Could not find user');
-            error.statusCode = 404;
-            throw error;
-        }
+    let email = req.body.email;
 
-        transport.sendMail({
-            to: user.email,
-            from: 'sevywagner@gmail.com',
-            subject: 'Order Confirmation from Dada Chinese',
-            html: '<p>Your order was successfully placed!</p>'
+    if (req.userId) {
+        User.findById(req.userId).then((user) => {
+            if (!user) {
+                const error = new Error('Could not find user');
+                error.statusCode = 404;
+                throw error;
+            }
+            
+            email = user.email;
+        }).catch((err) => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
         });
-    }).catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
+    }
+    
+    transport.sendMail({
+        to: email,
+        from: 'sevywagner@gmail.com',
+        subject: 'Order Confirmation from Dada Chinese',
+        html: '<p>Your order was successfully placed!</p>'
     });
 }
 
@@ -90,31 +95,44 @@ exports.putNewOrder = (req, res, next) => {
     const items = req.body.items;
     const totalPrice = req.body.totalPrice;
     const address = req.body.address;
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        const error = new Error(errors.array()[0].msg);
-        error.statusCode = 422;
-        throw error;
-    }
-
-    User.findById(req.userId).then((user) => {
-        if (!user) {
-            const error = new Error('Could not find user');
-            error.statusCode = 404;
+    
+    let user;
+    
+    if (!req.userId) {
+        user = {
+            email: req.body.email,
+            name: req.body.name,
+            _id: null
+        }
+    } else {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const error = new Error(errors.array()[0].msg);
+            error.statusCode = 422;
             throw error;
         }
-        
-        const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), user._id);
-        order.save().then(() => {
-            res.status(201).json({
-                message: 'Created order'
-            });
+
+        User.findById(req.userId).then((loadedUser) => {
+            if (!loadedUser) {
+                const error = new Error('Could not find user');
+                error.statusCode = 404;
+                throw error;
+            }
+            
+            user = loadedUser;
         }).catch((err) => {
             if (!err.statusCode) {
                 err.statusCode = 500;
             }
             next(err);
+        });
+    }
+
+
+    const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), user._id);
+    order.save().then(() => {
+        res.status(201).json({
+            message: 'Created order'
         });
     }).catch((err) => {
         if (!err.statusCode) {
