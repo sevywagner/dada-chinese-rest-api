@@ -47,7 +47,7 @@ exports.getCart = (req, res, next) => {
             throw error;
         }
 
-        res.status(200).json(user.cart);
+        res.status(200).json({ cart: user.cart, credit: user.credit });
     }).catch((err) => {
         if (!err.statusCode) {
             err.statusCode = 500;
@@ -75,6 +75,12 @@ exports.postConfirmOrder = (req, res, next) => {
             }
             
             email = user.email;
+            transport.sendMail({
+                to: email,
+                from: 'sevywagner@gmail.com',
+                subject: 'Order Confirmation from Dada Chinese',
+                html: '<p>Your order was successfully placed!</p>'
+            });
         }).catch((err) => {
             if (!err.statusCode) {
                 err.statusCode = 500;
@@ -82,20 +88,13 @@ exports.postConfirmOrder = (req, res, next) => {
             next(err);
         });
     }
-    
-    transport.sendMail({
-        to: email,
-        from: 'sevywagner@gmail.com',
-        subject: 'Order Confirmation from Dada Chinese',
-        html: '<p>Your order was successfully placed!</p>'
-    });
 }
 
 exports.putNewOrder = (req, res, next) => {
     const items = req.body.items;
     const totalPrice = req.body.totalPrice;
     const address = req.body.address;
-    
+
     let user;
     
     if (!req.userId) {
@@ -120,6 +119,13 @@ exports.putNewOrder = (req, res, next) => {
             }
             
             user = loadedUser;
+            const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), user._id);
+
+            return order.save();
+        }).then(() => {
+            res.status(201).json({
+                message: 'Created order'
+            });
         }).catch((err) => {
             if (!err.statusCode) {
                 err.statusCode = 500;
@@ -127,19 +133,6 @@ exports.putNewOrder = (req, res, next) => {
             next(err);
         });
     }
-
-
-    const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), user._id);
-    order.save().then(() => {
-        res.status(201).json({
-            message: 'Created order'
-        });
-    }).catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
-    });
 }
 
 exports.getOrders = (req, res, next) => {
@@ -166,4 +159,72 @@ exports.getOrders = (req, res, next) => {
         }
         next(err);
     });
+}
+
+exports.postAddCredit = (req, res, next) => {
+    const credit = req.body.credit;
+
+    User.findById(req.userId).then((targetUser) => {
+        if (!targetUser) {
+            const error = new Error('This token does not belong to a user');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const newUser = new User(
+            targetUser.name, 
+            targetUser.email, 
+            targetUser.password, 
+            targetUser.cart, 
+            targetUser.resetToken, 
+            targetUser.resetTokenExpiration, 
+            targetUser.credit,
+            targetUser._id
+        );
+
+        return newUser.updateCredit(parseInt(credit) + parseInt(targetUser.credit));
+    }).then(() => {
+        res.status(200).json({
+            message: 'Success'
+        });
+    }).catch((err) => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    })
+}
+
+exports.postUseCredit = (req, res, next) => {
+    const amountUsed = req.body.creditUsed;
+
+    User.findById(req.userId).then((targetUser) => {
+        if (!targetUser) {
+            const error = new Error('This token does not belong to a user');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const newUser = new User(
+            targetUser.name, 
+            targetUser.email, 
+            targetUser.password, 
+            targetUser.cart, 
+            targetUser.resetToken, 
+            targetUser.resetTokenExpiration, 
+            targetUser.credit,
+            targetUser._id
+        );
+
+        return newUser.updateCredit(parseInt(targetUser.credit) - parseInt(amountUsed));
+    }).then(() => {
+        res.status(200).json({
+            message: 'Success'
+        });
+    }).catch((err) => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    })
 }

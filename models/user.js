@@ -4,13 +4,14 @@ const getDb = require('./../util/database').getDb;
 const ObjectId = mongodb.ObjectId;
 
 class User {
-    constructor(name, email, password, cart, resetToken, resetTokenExpiration, id) {
+    constructor(name, email, password, cart, resetToken, resetTokenExpiration, credit, id) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.cart = cart;
         this.resetToken = resetToken || null;
         this.resetTokenExpiration = resetTokenExpiration || null;
+        this.credit = credit || 0;
         this._id = id;
     }
 
@@ -39,6 +40,11 @@ class User {
     updatePassword(password) {
         const db = getDb();
         return db.collection('users').updateOne({ _id: this._id }, { $set: { password: password } });
+    }
+
+    updateCredit(credit) {
+        const db = getDb();
+        return db.collection('users').updateOne({ _id: this._id }, { $set: { credit: credit } });
     }
 
     static findById(userId) {

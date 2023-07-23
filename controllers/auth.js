@@ -93,7 +93,7 @@ exports.postForgotPassword = (req, res, next) => {
         const tokenExpiration = new Date().getTime() + 3600000;
 
         User.findByEmail(email).then((user) => {
-            const newUser = new User(user.name, user.email, user.password, user.cart, token, tokenExpiration, user._id);
+            const newUser = new User(user.name, user.email, user.password, user.cart, token, tokenExpiration, user.credit, user._id);
 
             return newUser.save();
         }).then((result) => {
@@ -136,7 +136,7 @@ exports.postChangePassword = (req, res, next) => {
         targetUser = user;
         return bcrypt.hash(password, 12);
     }).then((hash) => {
-        const newUser = new User(targetUser.name, targetUser.email, hash, targetUser.cart, targetUser.resetToken, targetUser.resetTokenExpiration, targetUser._id);
+        const newUser = new User(targetUser.name, targetUser.email, hash, targetUser.cart, targetUser.resetToken, targetUser.resetTokenExpiration, targetUser.credit, targetUser._id);
 
         return newUser.updatePassword(hash);
     }).then((result) => {

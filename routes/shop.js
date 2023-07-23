@@ -13,4 +13,7 @@ router.put('/new-order-guest', shopController.putNewOrder);
 
 router.get('/orders', isAuth, shopController.getOrders);
 
+router.post('/add-credit', isAuth, shopController.postAddCredit);
+router.post('/use-credit', isAuth, shopController.postUseCredit);
+
 module.exports = router;
