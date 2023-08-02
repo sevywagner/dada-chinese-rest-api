@@ -57,14 +57,12 @@ exports.getCart = (req, res, next) => {
 }
 
 exports.postConfirmOrder = (req, res, next) => {
-    const cartItems = req.body.cartItems;
-    let string = '';
-    const stringItems = cartItems.forEach((item) => {
-        string += `${item.title} ${item.price}`
-    });
-    console.log(stringItems);
-
-    let email = req.body.email;
+    // const cartItems = req.body.cartItems;
+    // let string = '';
+    // const stringItems = cartItems.forEach((item) => {
+    //     string += `${item.title} ${item.price}`
+    // });
+    console.log(req.body.email);
 
     if (req.userId) {
         User.findById(req.userId).then((user) => {
@@ -73,10 +71,9 @@ exports.postConfirmOrder = (req, res, next) => {
                 error.statusCode = 404;
                 throw error;
             }
-            
-            email = user.email;
+        
             transport.sendMail({
-                to: email,
+                to: user.email,
                 from: 'sevywagner@gmail.com',
                 subject: 'Order Confirmation from Dada Chinese',
                 html: '<p>Your order was successfully placed!</p>'
@@ -86,6 +83,13 @@ exports.postConfirmOrder = (req, res, next) => {
                 err.statusCode = 500;
             }
             next(err);
+        });
+    } else {
+        transport.sendMail({
+            to: req.body.email,
+            from: 'sevywagner@gmail.com',
+            subject: 'Order Confirmation from Dada Chinese',
+            html: '<p>Your order was successfully placed!</p>'
         });
     }
 }
@@ -101,8 +105,20 @@ exports.putNewOrder = (req, res, next) => {
         user = {
             email: req.body.email,
             name: req.body.name,
-            _id: null
+            _id: 'Guest'
         }
+
+        const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), user._id);
+        order.save().then((order) => {
+            res.status(201).json({
+                message: 'Created order'
+            });
+        }).catch((err) => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        });
     } else {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
