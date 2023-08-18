@@ -139,6 +139,13 @@ exports.putNewOrder = (req, res, next) => {
 
             return order.save();
         }).then(() => {
+            transport.sendMail({
+                to: '',
+                from: '',
+                subject: 'Order on Dada Chinese Website',
+                html: `<p>${user.name} placed an order, <a>click here to view</a></p>`
+            });
+
             res.status(201).json({
                 message: 'Created order'
             });
