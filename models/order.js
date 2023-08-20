@@ -1,4 +1,5 @@
 const getDb = require('./../util/database').getDb;
+const mongo = require('mongodb');
 
 class Order {
     constructor(items, totalPrice, address, userEmail, name, date, userId) {
@@ -19,6 +20,16 @@ class Order {
     static fetchOrders() {
         const db = getDb();
         return db.collection('orders').find().toArray();
+    }
+
+    static fetchUserOrders(userId) {
+        const db = getDb();
+        return db.collection('orders').find({ userId: new mongo.ObjectId(userId) }).toArray();
+    }
+
+    static findById(orderId) {
+        const db = getDb();
+        return db.collection('orders').findOne({ _id: new mongo.ObjectId(orderId) });
     }
 }
 

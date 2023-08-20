@@ -10,7 +10,7 @@ const transport = createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: 'sevywagner@gmail.com',
+        user: 'jingyi.wang@dadachinese.com',
         pass: process.env.TRANSPORT_PASS
     }
 });

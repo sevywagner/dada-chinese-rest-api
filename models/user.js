@@ -4,14 +4,13 @@ const getDb = require('./../util/database').getDb;
 const ObjectId = mongodb.ObjectId;
 
 class User {
-    constructor(name, email, password, cart, resetToken, resetTokenExpiration, credit, id) {
+    constructor(name, email, password, cart, resetToken, resetTokenExpiration, id) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.cart = cart;
         this.resetToken = resetToken || null;
         this.resetTokenExpiration = resetTokenExpiration || null;
-        this.credit = credit || 0;
         this._id = id;
     }
 
