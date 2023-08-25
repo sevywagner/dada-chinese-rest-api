@@ -10,7 +10,7 @@ router.put('/new-order', isAuth, shopController.putNewOrder);
 router.put('/new-order-guest', shopController.putNewOrder);
 
 router.get('/orders', isAuth, shopController.getOrders);
-router.get('/user-orders', isAuth, shopController.getUserOrders);
+router.post('/user-orders', isAuth, shopController.getUserOrders);
 router.post('/fetch-order', shopController.getOrder);
 
 module.exports = router;

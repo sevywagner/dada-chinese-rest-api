@@ -141,10 +141,20 @@ exports.getOrders = (req, res, next) => {
 }
 
 exports.getUserOrders = (req, res, next) => {
-    Order.fetchUserOrders(req.userId).then((orders) => {
-        notFoundErrorHandler(orders, 'Unable to fetch orders');
+    const pageNum = req.body.pageNum;
+    const perPage = 4;
+    let orders;
 
-        res.status(200).json({ orders });
+    Order.fetchUserOrders(req.userId, ((pageNum - 1) * perPage), perPage).then((loadedOrders) => {
+        notFoundErrorHandler(loadedOrders, 'Unable to fetch orders');
+
+        orders = loadedOrders;
+        return Order.fetchAllUserOrders(req.userId);
+    }).then((allOrders) => {
+        res.status(200).json({
+            orders,
+            maxPage: Math.ceil(allOrders.length / perPage)
+        });
     }).catch((err) => {
         catchHandler(err, next);
     });
