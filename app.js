@@ -13,6 +13,7 @@ const mongoConnect = require('./util/database').mongoConnect;
 const postRoutes = require('./routes/posts');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
+const classTimeRoutes = require('./routes/classTimes');
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.use(multer({ storage: diskStorage, fileFilter: fileFilter }).single('image')
 app.use(postRoutes);
 app.use('/shop', shopRoutes);
 app.use('/auth', authRoutes);
+app.use('/class-times', classTimeRoutes);
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((error, req, res, next) => {
