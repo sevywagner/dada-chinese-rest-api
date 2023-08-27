@@ -19,7 +19,7 @@ exports.postUpdateCart = (req, res, next) => {
     User.findById(req.userId).then((user) => {
         notFoundErrorHandler(user, 'Unable to fetch user');
 
-        const newUser = new User(user.name, user.email, user.password, user.cart, user._id);
+        const newUser = new User(user.name, user.email, user.password, null, null, user.cart, user._id);
 
         return newUser.addCart(cart);
     }).then(() => {
@@ -56,7 +56,7 @@ exports.putNewOrder = (req, res, next) => {
             _id: 'Guest'
         }
 
-        const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), user._id);
+        const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), null, user._id);
         order.save().then((order) => {
             transport.sendMail({
                 to: 'sevywagner@gmail.com',
@@ -94,7 +94,9 @@ exports.putNewOrder = (req, res, next) => {
             }
             
             user = loadedUser;
-            const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), user._id);
+            return Order.fetchAllUserOrders(user._id);
+        }).then((orders) => {
+            const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), orders.length + 1, user._id);
 
             return order.save();
         }).then((order) => {
@@ -122,8 +124,12 @@ exports.putNewOrder = (req, res, next) => {
 }
 
 exports.getOrders = (req, res, next) => {
-    Order.fetchOrders().then((orders) => {
-        notFoundErrorHandler(orders, 'Unable to fetch orders');
+    const perPage = 4;
+    const pageNum = req.body.pageNum;
+    let orders;
+
+    Order.fetchOrders(((pageNum - 1) * perPage), perPage).then((fetchedOrders) => {
+        notFoundErrorHandler(fetchedOrders, 'Unable to fetch orders');
 
         if (!req.isAdmin) {
             const error = new Error('You are not authenticated');
@@ -131,9 +137,13 @@ exports.getOrders = (req, res, next) => {
             throw error;
         }
 
+        orders = fetchedOrders;
+        return Order.fetchAllOrders()
+    }).then((allOrders) => {
         res.status(200).json({
             message: 'Successfully fetched orders',
-            orders: orders
+            orders: orders,
+            maxPage: Math.ceil(allOrders.length / perPage)
         });
     }).catch((err) => {
         catchHandler(err, next);

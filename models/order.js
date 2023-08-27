@@ -2,13 +2,14 @@ const getDb = require('./../util/database').getDb;
 const mongo = require('mongodb');
 
 class Order {
-    constructor(items, totalPrice, address, userEmail, name, date, userId) {
+    constructor(items, totalPrice, address, userEmail, name, date, orderNum, userId) {
         this.items = items;
         this.totalPrice = totalPrice;
         this.address = address;
         this.userEmail = userEmail;
         this.name = name;
         this.date = date;
+        this.orderNumber = orderNum;
         this.userId = userId;
     }
 
@@ -17,14 +18,19 @@ class Order {
         return db.collection('orders').insertOne(this);
     }
 
-    static fetchOrders(pageNum, perPage) {
+    static fetchAllOrders() {
         const db = getDb();
-        return db.collection('orders').find().skip((pageNum - 1) * perPage).limit(perPage).toArray();
+        return db.collection('orders').find().toArray();
+    }
+
+    static fetchOrders(skipNumber, perPage) {
+        const db = getDb();
+        return db.collection('orders').find().sort({ orderNumber: -1 }).skip(skipNumber).limit(perPage).toArray();
     }
 
     static fetchUserOrders(userId, skipNumber, perPage) {
         const db = getDb();
-        return db.collection('orders').find({ userId: new mongo.ObjectId(userId) }).skip(skipNumber).limit(perPage).toArray();
+        return db.collection('orders').find({ userId: new mongo.ObjectId(userId) }).sort({ orderNumber: -1 }).skip(skipNumber).limit(perPage).toArray();
     }
 
     static findById(orderId) {
