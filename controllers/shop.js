@@ -62,14 +62,14 @@ exports.putNewOrder = (req, res, next) => {
                 to: 'sevywagner@gmail.com',
                 from: 'jingyi.wang@dadachinese.com',
                 subject: 'Order on Dada Chinese Website',
-                html: `<p>${user.name} placed an order, <a href="http://localhost:3000/orders/${order.insertedId.toString()}">click here to view</a></p>`
+                html: `<p>${user.name} placed an order, <a href="https://dadachinese.com/orders/${order.insertedId.toString()}">click here to view</a></p>`
             });
 
             transport.sendMail({
                 to: user.email,
                 from: 'jingyi.wang@dadachinese.com',
                 subject: 'Order Confirmation from Dada Chinese',
-                html: `<p>Your order was successfully placed! <a href="http://localhost:3000/orders/${order.insertedId.toString()}">Click here to view</a></p>`
+                html: `<p>Your order was successfully placed! <a href="https://dadachinese.com/orders/${order.insertedId.toString()}">Click here to view</a></p>`
             });
 
             res.status(201).json({
@@ -104,14 +104,14 @@ exports.putNewOrder = (req, res, next) => {
                 to: 'sevywagner@gmail.com',
                 from: 'jingyi.wang@dadachinese.com',
                 subject: 'Order on Dada Chinese Website',
-                html: `<p>${user.name} placed an order, <a href="http://localhost:3000/orders/${order.insertedId.toString()}">click here to view</a></p>`
+                html: `<p>${user.name} placed an order, <a href="https://dadachinese.com/orders/${order.insertedId.toString()}">click here to view</a></p>`
             });
 
             transport.sendMail({
                 to: user.email,
                 from: 'jingyi.wang@dadachinese.com',
                 subject: 'Order Confirmation from Dada Chinese',
-                html: `<p>Your order was successfully placed! <a href="http://localhost:3000/orders/${order.insertedId.toString()}">Click here to view</a></p>`
+                html: `<p>Your order was successfully placed! <a href="https://dadachinese.com/orders/${order.insertedId.toString()}">Click here to view</a></p>`
             });
 
             res.status(201).json({
