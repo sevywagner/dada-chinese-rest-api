@@ -32,7 +32,7 @@ exports.putSignup = (req, res, next) => {
         });
         transport.sendMail({
             to: email,
-            from: 'sevywagner@gmail.com',
+            from: 'jingyi.wang@dadachinese.com',
             subject: 'Successfully Signed Up',
             html: '<h1>You successfully signed up for dada chinese.</h1>'
         });
@@ -99,9 +99,9 @@ exports.postForgotPassword = (req, res, next) => {
         }).then((result) => {
             transport.sendMail({
                 to: email,
-                from: 'sevywagner@gmail.com',
+                from: 'jingyi.wang@dadachinese.com',
                 secure: true,
-                html: `<p>Click <a href="https://sevywagner.github.io/dada-chinese/reset-password/${token}">here</a> to reset password</p>`
+                html: `<p>Click <a href="https://dadachinese.com/reset-password/${token}">here</a> to reset password</p>`
             });
             res.status(200).json({
                 message: 'Successfully sent the reset link to your email. It expires in 1 hour.'

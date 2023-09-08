@@ -59,7 +59,7 @@ exports.putNewOrder = (req, res, next) => {
         const order = new Order(items, totalPrice, address, user.email, user.name, new Date().toDateString(), null, user._id);
         order.save().then((order) => {
             transport.sendMail({
-                to: 'sevywagner@gmail.com',
+                to: 'jingyi.wang@dadachinese.com',
                 from: 'jingyi.wang@dadachinese.com',
                 subject: 'Order on Dada Chinese Website',
                 html: `<p>${user.name} placed an order, <a href="https://dadachinese.com/orders/${order.insertedId.toString()}">click here to view</a></p>`
@@ -101,7 +101,7 @@ exports.putNewOrder = (req, res, next) => {
             return order.save();
         }).then((order) => {
             transport.sendMail({
-                to: 'sevywagner@gmail.com',
+                to: 'jingyi.wang@dadachinese.com',
                 from: 'jingyi.wang@dadachinese.com',
                 subject: 'Order on Dada Chinese Website',
                 html: `<p>${user.name} placed an order, <a href="https://dadachinese.com/orders/${order.insertedId.toString()}">click here to view</a></p>`
