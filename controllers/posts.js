@@ -86,18 +86,6 @@ exports.postCreatePost = async (req, res, next) => {
         } catch(err) {
             console.log(err);
         }
-    
-        // try {
-        //     const response = await drive.permissions.create({
-        //         fileId: driveId,
-        //         requestBody: {
-        //             role: 'reader',
-        //             type: 'anyone'
-        //         }
-        //     });
-        // } catch(err) {
-        //     console.log(err);
-        // }
     }
 
     
