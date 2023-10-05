@@ -48,7 +48,7 @@ app.use(helmet());
 app.use(compression());
 app.use(morgan('combined', { stream: accessLogStream }));
 app.use(cors());
-app.use(multer({ storage: diskStorage, fileFilter: fileFilter }).single('image'));
+app.use(multer({ storage: diskStorage, fileFilter: fileFilter }).array('image', 10));
 
 app.use(postRoutes);
 app.use('/shop', shopRoutes);

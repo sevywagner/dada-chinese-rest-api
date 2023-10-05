@@ -49,63 +49,69 @@ exports.postCreatePost = async (req, res, next) => {
 
     const title = req.body.title;
     const content = req.body.content;
-    const image = req.file;
+    const images = req.files;
     const videoUrl = req.body.videoUrl;
     const date = req.body.date;
 
     const drive = google.drive({ version: 'v3', auth: oauth2Client });
-    let driveId, webContentLink;
+    let driveId, webContentLinks = [];
 
-    try {
-        const response = await drive.files.create({
-            requestBody: {
-                mimeType: image.mimeType,
-                name: image.originalname
-            },
-            media: {
-                mimeType: image.mimeType,
-                body: fs.createReadStream(image.path)
-            }
-        });
-
-        driveId = response.data.id;
-    } catch(err) {
-        console.log(err);
-    }
-
-    try {
-        const response = await drive.files.get({
-            fileId: driveId,
-            mimeType: image.mimetype,
-            fields: 'webContentLink'
-        });
-
-        webContentLink = response.data.webContentLink;
-    } catch(err) {
-        console.log(err);
-    }
-
-    try {
-        const response = await drive.permissions.create({
-            fileId: driveId,
-            requestBody: {
-                role: 'reader',
-                type: 'anyone'
-            }
-        });
-    } catch(err) {
-        console.log(err);
-    }
+    for (let i = 0; i < images.length; i++) {
+        try {
+            const response = await drive.files.create({
+                requestBody: {
+                    mimeType: images[i].mimeType,
+                    name: images[i].originalname
+                },
+                media: {
+                    mimeType: images[i].mimeType,
+                    body: fs.createReadStream(images[i].path)
+                }
+            });
     
-    const post = new Post(title, content, webContentLink, videoUrl, date);
+            driveId = response.data.id;
+        } catch(err) {
+            console.log(err);
+        }
+    
+        try {
+            const response = await drive.files.get({
+                fileId: driveId,
+                mimeType: images[i].mimetype,
+                fields: 'webContentLink'
+            });
+            
+            console.log(response.data.webContentLink);
+            webContentLinks.push(response.data.webContentLink);
+        } catch(err) {
+            console.log(err);
+        }
+    
+        // try {
+        //     const response = await drive.permissions.create({
+        //         fileId: driveId,
+        //         requestBody: {
+        //             role: 'reader',
+        //             type: 'anyone'
+        //         }
+        //     });
+        // } catch(err) {
+        //     console.log(err);
+        // }
+    }
+
+    
+    const post = new Post(title, content, webContentLinks, videoUrl, date);
 
     post.save().then(() => {
         console.log('Added');
-        fs.unlink(image.path, (err) => {
-            if (err) {
-                console.log(err);
-            }
-        });
+        for (const image of images) {
+            fs.unlink(image.path, (err) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
+        }
         res.status(201).json({
             message: 'Success'
         });

@@ -4,10 +4,10 @@ const mongodb = require('mongodb');
 const ObjectId = mongodb.ObjectId;
 
 class Post {
-    constructor(title, content, imageWebContentLink, videoUrl, date, id) {
+    constructor(title, content, imageWebContentLinks, videoUrl, date, id) {
         this.title = title;
         this.content = content;
-        this.imageWebContentLink = imageWebContentLink;
+        this.imageWebContentLinks = imageWebContentLinks;
         this.videoUrl = videoUrl ? videoUrl : null;
         this.date = date;
         this._id = id ? new ObjectId(id) : null;
