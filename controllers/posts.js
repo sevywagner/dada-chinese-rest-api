@@ -71,7 +71,9 @@ exports.postCreatePost = async (req, res, next) => {
     
             driveId = response.data.id;
         } catch(err) {
-            console.log(err);
+            const error = new Error('Messed up trying to preform google operations.');
+            error.statusCode = 500;
+            throw error;
         }
     
         try {
@@ -84,7 +86,9 @@ exports.postCreatePost = async (req, res, next) => {
             console.log(response.data.webContentLink);
             webContentLinks.push(response.data.webContentLink);
         } catch(err) {
-            console.log(err);
+            const error = new Error('Messed up trying to preform google operations.');
+            error.statusCode = 500;
+            throw error;
         }
     }
 
