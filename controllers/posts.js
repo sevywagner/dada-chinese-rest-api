@@ -90,6 +90,20 @@ exports.postCreatePost = async (req, res, next) => {
             error.statusCode = 500;
             throw error;
         }
+
+        try {
+            const response = drive.permissions.create({
+                fileId: driveId,
+                requestBody: {
+                    role: 'reader',
+                    type: 'anyone'
+                }
+            });
+        } catch (err) {
+            const error = new Error('Messed up trying to preform google operations.');
+            error.statusCode = 500;
+            throw error;
+        }
     }
 
     
