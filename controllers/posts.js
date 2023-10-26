@@ -142,61 +142,67 @@ exports.putEditPost = async (req, res, next) => {
     const title = req.body.title;
     const content = req.body.content;
     const date = req.body.date;
-    let imageWebContentLink = req.body.imageWebContentLink;
-    if (req.file) {
-        let driveId;
-        const image = req.file;
-
-        try {
-            const response = await drive.files.create({
-                requestBody: {
-                    mimeType: image.mimeType,
-                    name: image.originalname
-                },
-                media: {
-                    mimeType: image.mimeType,
-                    body: fs.createReadStream(image.path)
-                }
-            });
-
-            driveId = response.data.id;
-        } catch(err) {
-            console.log(err);
+    let imageWebContentLinks = [];
+    if (req.files) {
+        const images = req.files;
+        console.log(images[0]);
+        
+        for (let i = 0; i < images.length; i++) {
+            let driveId;
+            try {
+                const response = await drive.files.create({
+                    requestBody: {
+                        mimeType: images[i].mimeType,
+                        name: images[i].originalname
+                    },
+                    media: {
+                        mimeType: images[i].mimeType,
+                        body: fs.createReadStream(images[i].path)
+                    }
+                });
+    
+                driveId = response.data.id;
+            } catch(err) {
+                console.log(err);
+            }
+    
+            try {
+                const response = await drive.files.get({
+                    fileId: driveId,
+                    mimeType: images[i].mimetype,
+                    fields: 'webContentLink'
+                });
+                
+                console.log(response.data.webContentLink);
+                imageWebContentLinks.push(response.data.webContentLink);
+    
+                fs.unlink(images[i].path, (err) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
+            } catch(err) {
+                console.log(err);
+            }
+    
+            try {
+                const response = await drive.permissions.create({
+                    fileId: driveId,
+                    requestBody: {
+                        role: 'reader',
+                        type: 'anyone'
+                    }
+                });
+            } catch(err) {
+                console.log(err);
+            }
         }
-
-        try {
-            const response = await drive.files.get({
-                fileId: driveId,
-                mimeType: image.mimetype,
-                fields: 'webContentLink'
-            });
-
-            imageWebContentLink = response.data.webContentLink;
-
-            fs.unlink(image.path, (err) => {
-                if (err) {
-                    console.log(err);
-                }
-            });
-        } catch(err) {
-            console.log(err);
-        }
-
-        try {
-            const response = await drive.permissions.create({
-                fileId: driveId,
-                requestBody: {
-                    role: 'reader',
-                    type: 'anyone'
-                }
-            });
-        } catch(err) {
-            console.log(err);
-        }
+    } else {
+        imageWebContentLinks = req.body.imageWebContentLinks;
     }
     const videoUrl = req.body.videoUrl;
 
-    const updatedPost = new Post(title, content, imageWebContentLink, videoUrl, date, postId);
+    const updatedPost = new Post(title, content, imageWebContentLinks, videoUrl, date, postId);
 
     updatedPost.update().then((result) => {
         console.log('Updated');
