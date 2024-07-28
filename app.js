@@ -17,14 +17,6 @@ const classTimeRoutes = require('./routes/classTimes');
 
 const app = express();
 
-app.use(bodyParser.json());
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    next();
-});
-
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 
 const diskStorage = multer.diskStorage({
@@ -44,10 +36,28 @@ const fileFilter = (req, file, cb) => {
     }
 }
 
+const corsOptions = {
+    origin: (origin, cb) => {
+        if (origin === process.env.ALLOWED_ORIGIN) {
+            cb(null, true);
+        } else {
+            cb(new Error("origin not allowed"));
+        }
+    }
+}
+
+app.use(bodyParser.json());
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN);
+    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+});
+
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(compression());
 app.use(morgan('combined', { stream: accessLogStream }));
-app.use(cors());
 app.use(multer({ storage: diskStorage, fileFilter: fileFilter }).array('image', 10));
 
 app.use(postRoutes);
