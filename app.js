@@ -14,6 +14,7 @@ const postRoutes = require('./routes/posts');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 const classTimeRoutes = require('./routes/classTimes');
+const contactRoutes = require('./routes/contact');
 
 const app = express();
 
@@ -64,6 +65,7 @@ app.use(postRoutes);
 app.use('/shop', shopRoutes);
 app.use('/auth', authRoutes);
 app.use('/class-times', classTimeRoutes);
+app.use('/contact', contactRoutes);
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((error, req, res, next) => {
